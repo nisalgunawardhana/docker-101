@@ -1,0 +1,55 @@
+name: "Submission"
+description: "Turn in Docker 101 labs with screenshots and PR link."
+title: "Submission: <your-name> - Docker 101"
+labels:
+  - submission
+  - pending review
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for submitting your Docker 101 labs! Attach your PR link, confirm screenshots are added under `submission/screenshots/`, and share any blockers.
+  - type: input
+    id: name
+    attributes:
+      label: Your name or handle
+      placeholder: "Jane Doe"
+    validations:
+      required: true
+  - type: input
+    id: pr
+    attributes:
+      label: PR URL
+      placeholder: "https://github.com/<org>/docker-101/pull/123"
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshot files added
+      description: "List the screenshot filenames you added under submission/screenshots/ (e.g., 01-hello-world-output.png)."
+      placeholder: |
+        01-hello-world-output.png
+        02-docker-ps.png
+        03-build-output.png
+        04-curl-response.png
+        05-compose-ps.png
+        06-nginx-curl.png
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes or blockers
+      description: "Anything reviewers should know."
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: "All required screenshots are in submission/screenshots/"
+          required: true
+        - label: "Labs completed per docs/hands-on.md"
+          required: true
+        - label: "PR opened and linked above"
+          required: true

@@ -1,0 +1,109 @@
+name: Submission workflow
+
+on:
+  issues:
+    types:
+      - opened
+      - reopened
+      - closed
+
+permissions:
+  issues: write
+
+jobs:
+  handle-submission:
+    if: startsWith(github.event.issue.title, 'Submission:') || contains(github.event.issue.labels.*.name, 'submission')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ensure labels exist
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = [
+              { name: "submission", color: "0ea5e9", description: "Issue created via submission form" },
+              { name: "pending review", color: "f59e0b", description: "Awaiting reviewer approval" },
+              { name: "submission completed", color: "22c55e", description: "Approved and closed by reviewer" },
+            ];
+            for (const label of labels) {
+              try {
+                await github.rest.issues.getLabel({ owner: context.repo.owner, repo: context.repo.repo, name: label.name });
+              } catch (error) {
+                if (error.status === 404) {
+                  await github.rest.issues.createLabel({ owner: context.repo.owner, repo: context.repo.repo, ...label });
+                } else {
+                  throw error;
+                }
+              }
+            }
+
+      - name: Label and acknowledge submission
+        if: github.event.action == 'opened' || github.event.action == 'reopened'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.issue;
+            await github.rest.issues.addLabels({
+              owner: issue.owner,
+              repo: issue.repo,
+              issue_number: issue.number,
+              labels: ["submission", "pending review"],
+            });
+            await github.rest.issues.createComment({
+              owner: issue.owner,
+              repo: issue.repo,
+              issue_number: issue.number,
+              body: "Thanks for submitting your Docker 101 work! The issue is labeled and pending review by @nisalgunawardhana.",
+            });
+
+      - name: Guard closure and award badge
+        if: github.event.action == 'closed'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.issue;
+            const actor = context.actor;
+            if (actor !== "nisalgunawardhana") {
+              await github.rest.issues.update({
+                owner: issue.owner,
+                repo: issue.repo,
+                issue_number: issue.number,
+                state: "open",
+              });
+              await github.rest.issues.createComment({
+                owner: issue.owner,
+                repo: issue.repo,
+                issue_number: issue.number,
+                body: "Only @nisalgunawardhana can close submission issues. Re-opening this issue.",
+              });
+              return;
+            }
+
+            // Remove pending review if present
+            try {
+              await github.rest.issues.removeLabel({
+                owner: issue.owner,
+                repo: issue.repo,
+                issue_number: issue.number,
+                name: "pending review",
+              });
+            } catch (error) {
+              if (error.status !== 404) {
+                throw error;
+              }
+            }
+
+            await github.rest.issues.addLabels({
+              owner: issue.owner,
+              repo: issue.repo,
+              issue_number: issue.number,
+              labels: ["submission completed"],
+            });
+
+            const defaultBranch = context.payload.repository?.default_branch || "main";
+            const badgeUrl = `https://raw.githubusercontent.com/${context.repo.owner}/${context.repo.repo}/${defaultBranch}/images/badge.png`;
+            await github.rest.issues.createComment({
+              owner: issue.owner,
+              repo: issue.repo,
+              issue_number: issue.number,
+              body: `Submission completed ✅\\n\\n![Docker 101 Badge](${badgeUrl})`,
+            });
