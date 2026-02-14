@@ -1,0 +1,12 @@
+{
+  "name": "custom-app",
+  "version": "1.0.0",
+  "description": "Docker 101 Lab 3 - Custom Node/Express app",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
