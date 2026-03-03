@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  app:
+    image: dhana0313/my-app:latest
+    container_name: node-app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:7
+    container_name: mongo-db
+    restart: always
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+
+volumes:
+  mongo_data:
