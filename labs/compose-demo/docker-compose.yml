@@ -4,7 +4,7 @@ services:
   web:
     image: nginx:1.27-alpine
     ports:
-      - "8081:80"
+      - "5000:80"
     restart: unless-stopped
   cache:
     image: redis:7-alpine
