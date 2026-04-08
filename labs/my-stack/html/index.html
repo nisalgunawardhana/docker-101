@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Docker App</title>
+</head>
+<body>
+    <h1>🚀 Docker Compose App Running!</h1>
+    <p>Frontend (Nginx) is working</p>
+
+    <h2>Test API:</h2>
+    <button onclick="loadData()">Get Data</button>
+
+    <p id="result"></p>
+
+    <script>
+        function loadData() {
+            fetch('http://localhost:5000/data')
+                .then(res => res.text())
+                .then(data => {
+                    document.getElementById('result').innerText = data;
+                });
+        }
+    </script>
+</body>
+</html>
